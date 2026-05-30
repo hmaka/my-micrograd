@@ -103,5 +103,49 @@ class Value:
 
             case _: raise ValueError(f"Uknown op: {self.op}")
 
+    
+# This function updates the grads of all the weights in the Value graph    
+def back_prop(root: Value):
+    # set start grad to 1.0
+    root.grad = 1.0 
+
+    def top_sort(root: Value, seen, ordering):
+        
+        seen.add(root)
+
+        for p in root.prev:
+            if p not in seen:
+                top_sort(p, seen, ordering)
+
+        ordering.append(root)
+
+        return ordering
 
     
+    reverse_top_ordering = reversed(top_sort(root, set(), []))
+
+     
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
