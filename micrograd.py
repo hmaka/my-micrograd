@@ -3,7 +3,7 @@ import math
 
 class Value:
 
-    def __init__(self, data: float, prev=(), op=""):
+    def __init__(self, data: float, prev=(), op="no-op"):
         self.data = data
         self.grad = 0.0
         self.prev = set(prev)
@@ -40,7 +40,7 @@ class Value:
     def log(self):
         return Value(math.log(self.data), (self,), "log")
 
-    def backward(self):
+    def _backward(self):
 
         match self.op:
             case "+":
@@ -85,9 +85,9 @@ class Value:
 
                 first.grad += second.data*(first.data**(second.data-1)) * self.grad
 
-                # dself/dsecond = (first ** second) * ln(second) 
+                # dself/dsecond = (first ** second) * ln(first)
                 # note first ** second = self
-                second.grad += self * math.exp(second) * self.grad
+                second.grad += self.data * math.log(first.data) * self.grad
 
             case "exp":
                 first = list(self.prev)[0]
@@ -99,17 +99,14 @@ class Value:
                 first = list(self.prev)[0]
                 # self = log(first) 
                 first.grad += 1/first.data * self.grad
-                
 
-            case _: raise ValueError(f"Uknown op: {self.op}")
 
-    
 # This function updates the grads of all the weights in the Value graph    
 def back_prop(root: Value):
     # set start grad to 1.0
     root.grad = 1.0 
 
-    def top_sort(root: Value, seen, ordering):
+    def top_sort(root: Value, seen, ordering) -> list[Value]:
         
         seen.add(root)
 
@@ -123,6 +120,10 @@ def back_prop(root: Value):
 
     
     reverse_top_ordering = reversed(top_sort(root, set(), []))
+
+    # go in reverse topological order and apply the backward function to update the gradiants 
+    for val in reverse_top_ordering: val._backward()
+        
 
      
 
