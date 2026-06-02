@@ -6,7 +6,7 @@ class Value:
     def __init__(self, data: float, prev=(), op="no-op"):
         self.data = data
         self.grad = 0.0
-        self.prev = set(prev)
+        self.prev = prev
         self.op = op
 
     def __repr__(self):
@@ -14,24 +14,35 @@ class Value:
     
 
     def __add__(self, other):
+        other = other if isinstance(other,Value) else Value(other)
         return Value(self.data + other.data, (self,other), "+")
 
     def __radd__(self,other):
         return self + other
 
     def __sub__(self, other):
+        other = other if isinstance(other,Value) else Value(other)
         return Value(self.data - other.data, (self,other), "-")
 
     def __neg__(self):
         return Value(-self.data, (self,), "-")
     
     def __mul__(self, other):
+        other = other if isinstance(other,Value) else Value(other)
         return Value(self.data * other.data, (self,other), "*")
 
+    def __rmul__(self, other):
+        return self * other
+
     def __truediv__(self,other):
+        other = other if isinstance(other,Value) else Value(other)
         return Value(self.data / other.data, (self,other), "/")
-    
+
+    def __rtruediv__(self, other):
+        return Value(other) / self
+
     def __pow__(self,other):
+        other = other if isinstance(other,Value) else Value(other)
         return Value(self.data**other.data,(self,other), "**")
 
     def exp(self):
