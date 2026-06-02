@@ -144,3 +144,19 @@ def test_log():
 
     for grad1, grad2 in zip(value_grads, num_grads):
         assert abs(grad1 - grad2) < 1e-5, f"Not OK, backwards computed:{grad1}, expected: {grad2}"
+
+def test_karpathy():
+    h = 0.00001
+    a,b,c = 2.0,3.0,4.0
+
+    def f(a, b, c):
+        b = math.exp(b) if isinstance(b,float) else b.exp()
+
+        return -a**3 + 3*b - 1.0/c + b**2.5 - a**0.5
+
+    raw = [a,b,c]
+    num_grads = calc_num_grads(raw, f, h)
+    value_grads = calc_val_grads(raw, f)
+
+    for grad1, grad2 in zip(value_grads, num_grads):
+        assert abs(grad1 - grad2) < 1e-5, f"Not OK, backwards computed:{grad1}, expected: {grad2}"
